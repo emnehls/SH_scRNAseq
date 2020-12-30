@@ -1,0 +1,105 @@
+# Some priorities for learning R to analyze scRNAseq data
+
+Hi Aisha,
+
+Here is a quick reference of what I recommend for learning R primarily
+for scRNAseq analysis as someone who is only a few steps ahead of you!
+
+Feel free to reach out if you have any questions!
+I am also happy to keep developing this into a tutorial based on 
+you questions and feedback. 
+
+Michael
+
+## What is the end goal?
+
+The R package that I am using to do the analysis is called Seurat. 
+It is maintained by the Satija Lab and they have really great tutorials.
+As a result, those are probably the fastest way to get into the data analysis.
+However, they assume a good understanding of the workflow before hopping in. 
+
+## What is the workflow?
+
+Some of this still seems like a bit of a black box to me, but I'll do my best!
+This also assumes you did 10x on an Illumina sequencer.
+
+1. FASTQ files are the raw data output by the Illumina sequencer. 
+1. The first step is to turn this data into a matrix
+that contains the number of reads per gene. 
+1. To do that, the FASTQ reads have to be aligned to a genome of interest,
+like the mouse genome.
+    * Alignment can be done by Cell Ranger - a 10x product -  
+    or Kallisto-Bustools - a pseudoaligner from another academic lab. 
+    * This was probably already done, but we can talk about what format your data is currently in!
+1. The next step is quality assurance and control.
+I don't actually know much about this step but am hoping to learn as I go!
+I was given some pre-processed data from GTAC, so they did it already. 
+I know some of this can be done in Seurat, 
+but there may be other "best practices"
+1. Lastly, you analyze in Seurat and R!
+
+## How much R do you need to know?
+
+Honestly, very little.
+I would focus more on getting comfortable with the analysis environment. 
+I have been using RStudio and doing all of my analysis
+(and this document) using R Markdown. 
+It allows you to mix prose and code, and I highly recommend it!
+
+You need to know how to assign things to variables :
+
+```{r variable}
+
+my_variable <- 3
+
+```
+Basic loops can be helpful, but not necessary if you don't mind
+retyping things a lot:
+
+``` {r for_loop}
+x <- 0
+numbers_to_add <- c(1:10)
+for (number_to_add in seq_along(numbers_to_add)) {
+    x <- x + number_to_add
+}
+x
+```
+Functions are another not strictly necessary tool, but can reduce retyping:
+
+```{r function}
+hours_left <- function(current_time, bed_time) {
+    time_to_bed <- bed_time - current_time
+    return(time_to_bed)
+}
+hours_left(23, 24)
+
+```
+And, most importantly, you need to know how to install and import packages:
+
+```{r packages}
+# if you haven't installed it yet
+# install.packages(Seurat)
+# if you have
+library(Seurat)
+```
+The only other thing that may be really helpful is a knowledge of ggplot2, 
+a package that allows you to make really nice plots that aren't included in 
+Seurat.
+The only plot from my script that uses this are the volcano-style plots
+towards the end. 
+
+ggplot2 can be installed by itself or as part of a bigger package called
+tidyverse. 
+This package is very helpful for general data analysis of tabular data, 
+but isn't really necessary for scRNAseq analysis specifically.
+
+## Other hangups
+
+The biggest challenge I faced starting out was actually just that the data
+files were so big that I couldn't download them to my computer. 
+They get smaller once you know exactly what you need and can import it into R.
+To start in Seurat, you need the count matrix files (don't quiz me 
+about the specifics of what is in each): barcodes.tsv, features.tsv, and matrix.mtx - that's it!
+
+To get to that point, you may have to extract a ton of big data files.
+Let me know if you have this problem, and I will help you!

@@ -2,3 +2,16 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# Ignore data
+**/KO_HKTB
+**/KO_Naive
+**/WT_HKTB
+**/WT_Naive
+**/KO_Mock
+**/WT_Mock
+
+# Ignore images, html files, and pdf files - may want to change this if we use this repo to prepare a publication
+*.html
+*.pdf
+*.png

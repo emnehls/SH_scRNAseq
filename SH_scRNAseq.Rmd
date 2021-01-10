@@ -16,6 +16,7 @@ library(patchwork)
 library(tidyverse)
 library(cowplot)
 library(stringr)
+# sessionInfo()
 ```
 
 ## Importing the data and integrating the two Naive Data Sets
@@ -32,57 +33,73 @@ so I still need to verify whether they are alright on our RAID system.
 ```{r Import}
 # loading Naive condition datasets for BMDMs from WT and KO genotypes
 # setting them as Seurat Objects
-wt_naive.data <- Read10X(data.dir = "WT_Naive/filtered_feature_bc_matrix/")
-wt_naive <- CreateSeuratObject(
-                               counts = wt_naive.data,
-                               project = "WT_Naive",
-                               min.cells = 3,
-                               min.features = 200
-)
-wt_naive@meta.data[, "condition"] <- "wt_naive"
-wt_naive
 
-ko_naive.data <- Read10X(data.dir = "KO_Naive/filtered_feature_bc_matrix/")
-ko_naive <- CreateSeuratObject(
-                               counts = ko_naive.data,
-                               project = "WT_Naive",
-                               min.cells = 3,
-                               min.features = 200
-)
-
-ko_naive@meta.data[, "condition"] <- "ko_naive"
-ko_naive
-
-#adding both naive objects into a list
-naive.list <- c(wt_naive, ko_naive)
-
-# before finding anchors between datasets, 
-# do standard preprocessing and identify variable features
-for (i in seq_along(naive.list)) {
-  naive.list[[i]] <- NormalizeData(naive.list[[i]], verbose = FALSE)
-  naive.list[[i]] <- FindVariableFeatures(
-                                    naive.list[[i]],
-                                    selection.method = "vst",
-                                    nfeatures = 2000,
-                                    verbose = FALSE
+renew_naive_integrated <- function() {
+  wt_naive.data <- Read10X(data.dir = "WT_Naive/filtered_feature_bc_matrix/")
+  wt_naive <- CreateSeuratObject(
+                                 counts = wt_naive.data,
+                                 project = "WT_Naive",
+                                 min.cells = 3,
+                                 min.features = 200
   )
-}  # vst = variance stabilizing transformation
+  wt_naive@meta.data[, "condition"] <- "wt_naive"
+  wt_naive
+  
+  ko_naive.data <- Read10X(data.dir = "KO_Naive/filtered_feature_bc_matrix/")
+  ko_naive <- CreateSeuratObject(
+                                 counts = ko_naive.data,
+                                 project = "WT_Naive",
+                                 min.cells = 3,
+                                 min.features = 200
+  )
+  
+  ko_naive@meta.data[, "condition"] <- "ko_naive"
+  ko_naive
+  
+  #adding both naive objects into a list
+  naive.list <- c(wt_naive, ko_naive)
+  
+  # before finding anchors between datasets, 
+  # do standard preprocessing and identify variable features
+  for (i in seq_along(naive.list)) {
+    naive.list[[i]] <- NormalizeData(naive.list[[i]], verbose = FALSE)
+    naive.list[[i]] <- FindVariableFeatures(
+                                      naive.list[[i]],
+                                      selection.method = "vst",
+                                      nfeatures = 2000,
+                                      verbose = FALSE
+    )
+  }  # vst = variance stabilizing transformation
+  
+  # identify anchors using FindIntegrationAnchors function,
+  # takes list of Seurat objects as input
+  
+  naive.anchors <- FindIntegrationAnchors(object.list = naive.list, dims = 1:30)
+  naive.integrated <- IntegrateData(anchorset = naive.anchors, dims = 1:30)
+   
+  # switch to integrated assay. The variable features of this assay are 
+  # automatically set during IntegrateData
+  
+  DefaultAssay(naive.integrated) <- "integrated"
+  
+  # Run the standard workflow for visualization and clustering
+  naive.integrated <- ScaleData(naive.integrated, verbose = FALSE)
+  naive.integrated <- RunPCA(naive.integrated, npcs = 30, verbose = FALSE)
+  naive.integrated <- RunUMAP(naive.integrated, reduction = "pca", dims = 1:30)
+  saveRDS(naive.integrated, "files/naive.integrated.rds") 
 
-# identify anchors using FindIntegrationAnchors function,
-# takes list of Seurat objects as input
+  return(naive.integrated)
+}
 
-naive.anchors <- FindIntegrationAnchors(object.list = naive.list, dims = 1:30)
-naive.integrated <- IntegrateData(anchorset = naive.anchors, dims = 1:30)
- 
-# switch to integrated assay. The variable features of this assay are 
-# automatically set during IntegrateData
-
-DefaultAssay(naive.integrated) <- "integrated"
-
-# Run the standard workflow for visualization and clustering
-naive.integrated <- ScaleData(naive.integrated, verbose = FALSE)
-naive.integrated <- RunPCA(naive.integrated, npcs = 30, verbose = FALSE)
-naive.integrated <- RunUMAP(naive.integrated, reduction = "pca", dims = 1:30)
+# Checks for an rds or renews the markers frame - set force = TRUE to renew all markers frames
+get_naive_integrated <- function(force = FALSE) {
+  if (!force & file.exists("files/naive.integrated.rds")){
+    naive.integrated <- readRDS("files/naive.integrated.rds") %>% return()
+  } else {
+    naive.integrated <- renew_naive_integrated() %>% return()
+  }
+}
+naive.integrated <- get_naive_integrated()
 
 p1 <- DimPlot(
               naive.integrated,
@@ -99,12 +116,24 @@ p1
 ### Pooled Cluster Plot
 
 ```{r Clustering_merged}
-naive.integrated <- FindNeighbors(
+renew_naive_integrated_UMAP <- function() {
+  naive.integrated <- FindNeighbors(
                                   naive.integrated,
                                   reduction = "pca",
                                   dims = 1:30
-)
-naive.integrated <- FindClusters(naive.integrated, resolution = 0.5)
+  )
+  naive.integrated <- FindClusters(naive.integrated, resolution = 0.5) %>% return()
+  saveRDS(naive.integrated, "files/naive.integrated.UMAP.rds")
+}
+get_naive_integrated_UMAP <- function(force = FALSE) {
+  if(!force & file.exists("files/naive.integrated.UMAP.rds")){
+    naive.integrated <- readRDS("files/naive.integrated.UMAP.rds") %>% return()
+  } else {
+    naive.integrated <- renew_naive_integrated_UMAP() %>% return()
+  }
+}
+naive.integrated <- get_naive_integrated_UMAP()
+
 p2 <- DimPlot(naive.integrated, reduction = "umap", label = TRUE)
 cowplot::plot_grid(p1, p2)
 p2
@@ -464,12 +493,12 @@ p_14 <- plot_cluster(14, genes_to_label)
 plot_grid(p2, p_14)
 ```
 
-## An attemp at pseudotime analysis
+## An attempt at pseudotime analysis
 
 This requires the SeuratWrappers library and Monocle3.
 It is pretty easy to generate!
 I need to read/experiment more to know how to modify the way that Monocle3 clusters and partitions.
-For example, I want to try to partition by what we thing the cells are.
+For example, I want to try to partition by what we think the cells are.
 For now, I have used the cluster with maximal c-kit expression as the root (time 0) of the analysis.
 
 ```{r pseudotime_experimentation}
@@ -502,3 +531,12 @@ wrap_plots(p2, p_pseudotime)
 ```
 
 Look at that! This is pretty exciting! I don't have any breakthrough interpretations, but it looks like clusters 2 and 5 have the highest expression of c-kit. It looks like cluster 6 and 13 are very mature, which fits with our interpretation of them as mature PMNs. That is all I really can say, given how early on I am in understanding this analysis. But just for fun, I will overinterpret it! It looks like there may be two distinct paths forward in pseudotime. The one to the left would fit with the interpretation that those clusters are DC like. The one to the right is fuzzier, expecially because given cell-types don't cluster as nicely. It looks like cluster 12 may be a less mature PMN cluster. And maybe cluster 9 is a mature macrophage like cluster (expresses Ccr2 highly)? It is a bit weird that clusters 0 and 1 have multiple pseudotimes attributed to them. I don't know what that means. I also need to better understand the significance of the branch points. Let me know if you have any questions! That will help guide what I learn about!  
+
+
+```{r scVelo setup}
+library(SeuratDisk)
+DefaultAssay(naive.integrated) <- "RNA"
+SaveH5Seurat(naive.integrated, filename = "files/naive.integrated.h5Seurat")
+Convert("files/naive.integrated.h5Seurat", dest = "h5ad")
+
+```

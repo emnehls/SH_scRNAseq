@@ -535,8 +535,12 @@ Look at that! This is pretty exciting! I don't have any breakthrough interpretat
 
 ```{r scVelo setup}
 library(SeuratDisk)
-DefaultAssay(naive.integrated) <- "RNA"
-SaveH5Seurat(naive.integrated, filename = "files/naive.integrated.h5Seurat")
-Convert("files/naive.integrated.h5Seurat", dest = "h5ad")
-
+renew_h5ad <- function() {
+  DefaultAssay(naive.integrated) <- "RNA"
+  SaveH5Seurat(naive.integrated, filename = "files/naive.integrated.h5Seurat")
+  Convert("files/naive.integrated.h5Seurat", dest = "h5ad")
+}
+check_h5ad <- function(force = FALSE) {
+  if(!forec & file.exists("files/naive.integrated.h5ad")){} else{renew_h5ad()}
+}
 ```

@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+**/env
 
 # Ignore data
 **/KO_HKTB
@@ -11,6 +12,7 @@
 **/KO_Mock
 **/WT_Mock
 files/naive.integrated.*
+
 # Ignore images, html files, and pdf files - may want to change this if we use this repo to prepare a publication
 *.html
 *.pdf

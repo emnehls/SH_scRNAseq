@@ -532,6 +532,15 @@ wrap_plots(p2, p_pseudotime)
 
 Look at that! This is pretty exciting! I don't have any breakthrough interpretations, but it looks like clusters 2 and 5 have the highest expression of c-kit. It looks like cluster 6 and 13 are very mature, which fits with our interpretation of them as mature PMNs. That is all I really can say, given how early on I am in understanding this analysis. But just for fun, I will overinterpret it! It looks like there may be two distinct paths forward in pseudotime. The one to the left would fit with the interpretation that those clusters are DC like. The one to the right is fuzzier, expecially because given cell-types don't cluster as nicely. It looks like cluster 12 may be a less mature PMN cluster. And maybe cluster 9 is a mature macrophage like cluster (expresses Ccr2 highly)? It is a bit weird that clusters 0 and 1 have multiple pseudotimes attributed to them. I don't know what that means. I also need to better understand the significance of the branch points. Let me know if you have any questions! That will help guide what I learn about!  
 
+## A stab at trajectory analysis using scVelo
+
+This is a package recommended by the Bryson lab.
+It performs an alternative to pseudotime without requiring a starting gene. 
+I will learn more as we go!
+
+scVelo is an RNA velocity method based on comparing the counts of spliced and unspliced gene reads to determine how fast expression is changing. 
+I am not sure where to find the spliced and unspliced reads. 
+As currently written, I don't think I have them.
 
 ```{r scVelo setup}
 library(SeuratDisk)
@@ -540,7 +549,22 @@ renew_h5ad <- function() {
   SaveH5Seurat(naive.integrated, filename = "files/naive.integrated.h5Seurat")
   Convert("files/naive.integrated.h5Seurat", dest = "h5ad")
 }
-check_h5ad <- function(force = FALSE) {
-  if(!forec & file.exists("files/naive.integrated.h5ad")){} else{renew_h5ad()}
+check_h5ad <- function(force = TRUE) {
+  if(!force & file.exists("files/naive.integrated.h5ad")){} else{renew_h5ad()}
 }
+```
+
+```{python, engine.path = '/opt/miniconda3/envs/env/bin/python3.8', echo = TRUE, message = TRUE, warning=TRUE}
+import scvelo as scv
+
+adata = scv.read("files/naive.integrated.h5ad")
+adata
+
+# scv.pp.filter_and_normalize(adata, min_shared_counts=20, n_top_genes=2000)
+# scv.pp.moments(adata, n_pcs=30, n_neighbors=30)
+# scv.tl.velocity(adata)
+# scv.tl.velocity_graph(adata)
+# scv.pl.velocity_embedding_stream(adata, basis="umap", color="seurat_clusters")
+
+
 ```

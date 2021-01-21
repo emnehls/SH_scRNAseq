@@ -406,6 +406,13 @@ p_DC
 
 ![](SH_scRNAseq_files/figure-html/featurePlot-3.png)<!-- -->
 
+```r
+p_AgPres <- FeaturePlot(naive.integrated, features = c("Ctse", "Hfe", "H2-Oa", "H2-Ob", "Trem2", "Rab5b", "Rab4a"), min.cutoff = "q9")
+p_AgPres
+```
+
+![](SH_scRNAseq_files/figure-html/featurePlot-4.png)<!-- -->
+
 ## Differential expression analysis
 
 Now it is time for differential expression analysis! I am thinking about approaching it in two ways: 

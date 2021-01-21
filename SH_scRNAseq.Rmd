@@ -274,6 +274,9 @@ p_PMN <- FeaturePlot(naive.integrated, features = c("Clec4d", "S100a8", "S100a9"
 p_PMN
 p_DC <- FeaturePlot(naive.integrated, features = c("Ctsh", "Ptms", "Napsa", "Ccr3", "Itgae","Flt3","Cxcl16", "Syngr2"), min.cutoff = "q9")
 p_DC
+
+p_AgPres <- FeaturePlot(naive.integrated, features = c("Ctse", "Hfe", "H2-Oa", "H2-Ob", "Trem2", "Rab5b", "Rab4a"), min.cutoff = "q9")
+p_AgPres
 ```
 
 ## Differential expression analysis

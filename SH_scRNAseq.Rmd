@@ -265,18 +265,29 @@ c1v6markers <- get_comparison_markers(1, 6)
 ### Looking at expression of predetermined genes
 
 The second is by asking what the expression profile is of makers that we know are associated with different cell types.
+This can also be used to visualize differentially epxressed genes separated by condition.
+For example, the plots of antigen presentation genes towards the end were differentially expressed by bulk RNAseq.
 
 ```{r featurePlot}
 ## Plot gene expression by feature - way faster!
 p_macs <- FeaturePlot(naive.integrated, features = c("Cd14", "Cd68", "Cd62l", "Cd31", "Cx3cr1", "Ace", "Ccr2", "Lyz2", "Lpl"), min.cutoff = "q9")
 p_macs
-p_PMN <- FeaturePlot(naive.integrated, features = c("Clec4d", "S100a8", "S100a9", "Acod1"), min.cutoff = "q9")
-p_PMN
+
+p_PMN_1 <- FeaturePlot(naive.integrated, features = c("Clec4d", "S100a8"), split.by = "condition", min.cutoff = "q9")
+p_PMN_1
+p_PMN_2 <- FeaturePlot(naive.integrated, features = c("S100a9", "Acod1"), split.by = "condition", min.cutoff = "q9")
+p_PMN_2
+
 p_DC <- FeaturePlot(naive.integrated, features = c("Ctsh", "Ptms", "Napsa", "Ccr3", "Itgae","Flt3","Cxcl16", "Syngr2"), min.cutoff = "q9")
 p_DC
 
-p_AgPres <- FeaturePlot(naive.integrated, features = c("Ctse", "Hfe", "H2-Oa", "H2-Ob", "Trem2", "Rab5b", "Rab4a"), min.cutoff = "q9")
-p_AgPres
+p_AgPres_1 <- FeaturePlot(naive.integrated, features = c("Ctse", "Hfe", "H2-Oa"), split.by = "condition")
+p_AgPres_1
+p_AgPres_2 <- FeaturePlot(naive.integrated, features = c("Trem2", "Rab5b", "Rab4a"), split.by = "condition")
+p_AgPres_2
+
+pnew <- FeaturePlot(naive.integrated, features = c("H2-Ab1", "H2-Ob"), split.by = "condition")
+pnew
 ```
 
 ## Differential expression analysis

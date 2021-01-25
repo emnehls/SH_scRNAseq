@@ -374,6 +374,8 @@ c1v6markers <- get_comparison_markers(1, 6)
 ### Looking at expression of predetermined genes
 
 The second is by asking what the expression profile is of makers that we know are associated with different cell types.
+This can also be used to visualize differentially epxressed genes separated by condition.
+For example, the plots of antigen presentation genes towards the end were differentially expressed by bulk RNAseq.
 
 
 ```r
@@ -393,25 +395,46 @@ p_macs
 ![](SH_scRNAseq_files/figure-html/featurePlot-1.png)<!-- -->
 
 ```r
-p_PMN <- FeaturePlot(naive.integrated, features = c("Clec4d", "S100a8", "S100a9", "Acod1"), min.cutoff = "q9")
-p_PMN
+p_PMN_1 <- FeaturePlot(naive.integrated, features = c("Clec4d", "S100a8"), split.by = "condition", min.cutoff = "q9")
+p_PMN_1
 ```
 
 ![](SH_scRNAseq_files/figure-html/featurePlot-2.png)<!-- -->
+
+```r
+p_PMN_2 <- FeaturePlot(naive.integrated, features = c("S100a9", "Acod1"), split.by = "condition", min.cutoff = "q9")
+p_PMN_2
+```
+
+![](SH_scRNAseq_files/figure-html/featurePlot-3.png)<!-- -->
 
 ```r
 p_DC <- FeaturePlot(naive.integrated, features = c("Ctsh", "Ptms", "Napsa", "Ccr3", "Itgae","Flt3","Cxcl16", "Syngr2"), min.cutoff = "q9")
 p_DC
 ```
 
-![](SH_scRNAseq_files/figure-html/featurePlot-3.png)<!-- -->
+![](SH_scRNAseq_files/figure-html/featurePlot-4.png)<!-- -->
 
 ```r
-p_AgPres <- FeaturePlot(naive.integrated, features = c("Ctse", "Hfe", "H2-Oa", "H2-Ob", "Trem2", "Rab5b", "Rab4a"), min.cutoff = "q9")
-p_AgPres
+p_AgPres_1 <- FeaturePlot(naive.integrated, features = c("Ctse", "Hfe", "H2-Oa"), split.by = "condition")
+p_AgPres_1
 ```
 
-![](SH_scRNAseq_files/figure-html/featurePlot-4.png)<!-- -->
+![](SH_scRNAseq_files/figure-html/featurePlot-5.png)<!-- -->
+
+```r
+p_AgPres_2 <- FeaturePlot(naive.integrated, features = c("Trem2", "Rab5b", "Rab4a"), split.by = "condition")
+p_AgPres_2
+```
+
+![](SH_scRNAseq_files/figure-html/featurePlot-6.png)<!-- -->
+
+```r
+pnew <- FeaturePlot(naive.integrated, features = c("H2-Ab1", "H2-Ob"), split.by = "condition")
+pnew
+```
+
+![](SH_scRNAseq_files/figure-html/featurePlot-7.png)<!-- -->
 
 ## Differential expression analysis
 

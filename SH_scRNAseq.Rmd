@@ -142,7 +142,11 @@ p2
 ### Cluster by condition
 ```{r Clustering_by_condition}
 DimPlot(naive.integrated, reduction = "umap", split.by = "condition")
+(counts_by_cluster <- table(naive.integrated@meta.data$integrated_snn_res.0.5, 
+                            naive.integrated@meta.data$condition))
 
+write_tsv(data.frame(counts_by_cluster),
+          file = "files/counts_by_cluster.tsv")
 ```
 
 ## Now we can plot the data and identify the gene expression in each of the clusters!
@@ -329,7 +333,7 @@ plot_cluster <- function(cluster, genes = c("Bhlhe40")) {
     Idents(naive.integrated) <- "celltype"
     cluster_subset <- subset(naive.integrated, idents = as.character(cluster))
     Idents(cluster_subset) <- "condition"
-    avg_exp <- log1p(AverageExpression(cluster_subset, verbose = FALSE)$RNA)
+    avg_exp <- as.data.frame(log1p(AverageExpression(cluster_subset, verbose = FALSE)$RNA))
     avg_exp$gene <- rownames(avg_exp)
 
     cluster_plot <- ggplot(avg_exp, aes(wt_naive, ko_naive)) +
@@ -507,6 +511,20 @@ p_14 <- plot_cluster(14, genes_to_label)
 plot_grid(p2, p_14)
 ```
 
+## Violin Plots
+
+```{r VPlots}
+plots <- VlnPlot(naive.integrated, features = c("Bhlhe40", "Kit", "H2-Ab1", "H2-Ob"), 
+                 split.by = "condition", group.by = "celltype", pt.size =0, combine = FALSE)
+
+for (i in 1:length(plots)){
+  print(plots[i])
+  
+}
+
+
+```
+
 ## An attempt at pseudotime analysis
 
 This requires the SeuratWrappers library and Monocle3.
@@ -558,6 +576,24 @@ As currently written, I don't think I have them.
 
 ```{r scVelo setup}
 library(SeuratDisk)
+# Test of pipeline
+ldat <- ReadVelocity(file = "velocyto/WT_Naive/results/velocyto/results.loom")
+wt_vel <- as.Seurat(x = ldat)
+wt_vel[["RNA"]] <-wt_vel[["spliced"]]
+wt_vel <- SCTransform(wt_vel)
+wt_vel <- RunPCA(wt_vel)
+wt_vel <- RunUMAP(wt_vel, dim = 1:20)
+wt_vel <- FindNeighbors(wt_vel, dims = 1:20)
+wt_vel <- FindClusters(wt_vel)
+DefaultAssay(wt_vel) <- "RNA"
+(p_wt_vel <- DimPlot(
+              wt_vel,
+              reduction = "umap",
+              label = TRUE,
+              repel = TRUE
+))
+# SaveH5Seurat(wt_vel, filename = "wt_vel.h5Seurat")
+# Convert("wt_vel.h5Seurat", dest = "h5ad")
 renew_h5ad <- function() {
   DefaultAssay(naive.integrated) <- "RNA"
   SaveH5Seurat(naive.integrated, filename = "files/naive.integrated.h5Seurat")
@@ -568,7 +604,7 @@ check_h5ad <- function(force = TRUE) {
 }
 ```
 
-```{python, engine.path = '/opt/miniconda3/envs/env/bin/python3.8', echo = TRUE, message = TRUE, warning=TRUE}
+```{python, engine.path = '/media/StallingsLab/scRNAseq/velocyto/env/bin/python', echo = TRUE, message = TRUE, warning=TRUE}
 import scvelo as scv
 
 adata = scv.read("files/naive.integrated.h5ad")

@@ -1,0 +1,22 @@
+# Notes from getting Velocyto to run on KO_Naive samples
+
+On my home desktop, velocyto was having a hard time allocating memory.
+I ended up sorting using samtools manually. 
+
+## samtools
+
+Here is the samtools sort command:
+samtools sort -m 2000M -t CB -O BAM -@ 10 -o KO_results/results/outs/cellsorted_possorted_genome_bam.bam KO_results/results/outs/possorted_genome_bam.bam
+
+-The -m option is to specify memory *per thread*
+-The -@ option is to specify the number of threads
+-I ran this command from the velocyto folder in the scRNAseq folder or root folder of the repo
+
+## velocyto
+
+Commmand:
+velocyto run10x -m mm10_rmsk.gtf KO_results/results refdata-gex-mm10-2020-A/genes/genes.gtf
+
+-ran this in velocyto folder inside root scRNAseq folder
+-velocyto is installed via python in a virtual environment,
+so first virtual environment must be actsource env/bin/activate

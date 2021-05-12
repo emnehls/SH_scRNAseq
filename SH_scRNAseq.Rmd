@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warnings = FALSE)
 library(Seurat)
 library(SeuratWrappers)
 library(monocle3)
@@ -570,13 +570,14 @@ These can be read into Seurat and the rest of the workflow should be the same.
 
 Here is an example of a shortened, unintegrated workflow using just the Naive WT cells.
 
-```{r scVelo setup}
+```{r scVelo setup, output = FALSE}
 library(SeuratDisk)
 # Test of pipeline
 ldat <- ReadVelocity(file = "velocyto/WT_Naive/results/velocyto/results.loom")
 wt_vel <- as.Seurat(x = ldat)
 wt_vel[["RNA"]] <-wt_vel[["spliced"]]
-wt_vel <- SCTransform(wt_vel)
+# I can't figure out how to supress the error messages from the SCTransform function...so my output is really ugly
+wt_vel <- SCTransform(wt_vel, verbose = FALSE)
 wt_vel <- RunPCA(wt_vel)
 wt_vel <- RunUMAP(wt_vel, dim = 1:20)
 wt_vel <- FindNeighbors(wt_vel, dims = 1:20)
@@ -588,9 +589,12 @@ DefaultAssay(wt_vel) <- "RNA"
               label = TRUE,
               repel = TRUE
 ))
-SaveH5Seurat(wt_vel, filename = "wt_vel.h5Seurat")
-Convert("wt_vel.h5Seurat", dest = "h5ad")
-
+if (!file.exists("wt_vel.h5Seurat")) {
+    SaveH5Seurat(wt_vel, filename = "wt_vel.h5Seurat")
+}
+if (!file.exists("wt_vel.h5ad")) {
+    Convert("wt_vel.h5Seurat", dest = "h5ad")
+           }
 #renew_h5ad <- function() {
 #  DefaultAssay(naive.integrated) <- "RNA"
 #  SaveH5Seurat(naive.integrated, filename = "files/naive.integrated.h5Seurat")
